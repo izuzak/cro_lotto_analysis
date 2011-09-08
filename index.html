@@ -63,7 +63,7 @@
 
       var data = {};
       function fetchData(url, name, elem_id) {
-        $.get(url, function(d) {
+        $.ajax({ url : url, crossDomain : true, success : function(d) {
           var lines = d.split("\n");
           data[name] = {};
           var minDate = null; 
@@ -118,7 +118,7 @@
           }).bind("valuesChanged", function(event, ui) { refreshView(ui.values.min, ui.values.max, name, elem_id); }).addClass("ui-rangeSlider-dev");
           
           refreshView(minDate, maxDate, name, elem_id);
-        });
+        }});
       }
 
       fetchData("http://izuzak.github.com/cro_lotto_analysis/7_39.txt", "7_39", "7_39_analysis");

@@ -63,7 +63,7 @@
 
       var data = {};
       function fetchData(url, name, elem_id) {
-        $.ajax({ url : url, async : false, crossDomain : true, success : function(d) {
+        $.ajax({ url : url, success : function(d) {
           var lines = d.split("\n");
           data[name] = {};
           var minDate = null; 

@@ -65,13 +65,9 @@
       function fetchData(url, name, elem_id) {
         $.ajax({ url : url, 
           error: function (xmlHttpRequest, textStatus, errorThrown) {
-            if(xmlHttpRequest.readyState == 0 || xmlHttpRequest.status == 0) {
-              return;  // it's not really an error
-            } else {
-              console.log(xmlHttpRequest);
-              console.log(textStatus);
-              console.log(errorThrown);
-            }
+            console.log(xmlHttpRequest);
+            console.log(textStatus);
+            console.log(errorThrown);
           }, success : function(d) {
           var lines = d.split("\n");
           data[name] = {};

@@ -63,12 +63,7 @@
 
       var data = {};
       function fetchData(url, name, elem_id) {
-        $.ajax({ url : url, 
-          error: function (xmlHttpRequest, textStatus, errorThrown) {
-            console.log(xmlHttpRequest);
-            console.log(textStatus);
-            console.log(errorThrown);
-          }, success : function(d) {
+        $.get(url, function(d) {
           var lines = d.split("\n");
           data[name] = {};
           var minDate = null; 
@@ -123,11 +118,11 @@
           }).bind("valuesChanged", function(event, ui) { refreshView(ui.values.min, ui.values.max, name, elem_id); }).addClass("ui-rangeSlider-dev");
           
           refreshView(minDate, maxDate, name, elem_id);
-        }});
+        });
       }
 
-      fetchData("http://izuzak.github.com/cro_lotto_analysis/7_39.txt", "7_39", "7_39_analysis");
-      fetchData("http://izuzak.github.com/cro_lotto_analysis/6_45.txt", "6_45", "6_45_analysis");
+      fetchData("7_39.txt", "7_39", "7_39_analysis");
+      fetchData("6_45.txt", "6_45", "6_45_analysis");
   
       function refreshView(startDate, endDate, name, elem_id) {
         var d = data[name].items;

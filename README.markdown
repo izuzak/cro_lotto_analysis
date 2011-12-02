@@ -14,4 +14,4 @@ The **application** is developed by [Ivan Zuzak](http://ivanzuzak.info) and lice
 
 # Credits
 
-The application was built with [jQuery](https://github.com/jquery/jquery), the [flot jQuery plugin](http://code.google.com/p/flot/) for drawing graphs and the [jQRangeSlider jQuery plugin](https://github.com/ghusse/jQRangeSlider) for choosing time ranges.
+The application was built with [jQuery](https://github.com/jquery/jquery), the [gRaphael](http://g.raphaeljs.com/) for drawing graphs and the [jQRangeSlider jQuery plugin](https://github.com/ghusse/jQRangeSlider) for choosing time ranges.

@@ -1,25 +1,26 @@
 <html>
   <head>
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
-    
-    <link rel="stylesheet" href="http://ghusse.github.com/jQRangeSlider/stable/css/dev.css">  
-    <link rel="stylesheet" href="http://ghusse.github.com/jQRangeSlider/stable/demo/style.css">  
-    <link rel="stylesheet" href="http://code.jquery.com/ui/jquery-ui-git.css">  
+
+    <link rel="stylesheet" href="http://ghusse.github.com/jQRangeSlider/stable/css/dev.css">
+    <link rel="stylesheet" href="http://ghusse.github.com/jQRangeSlider/stable/demo/style.css">
+    <link rel="stylesheet" href="http://code.jquery.com/ui/jquery-ui-git.css">
 
     <script src="http://code.jquery.com/ui/jquery-ui-git.js"></script>
     <script src="http://ghusse.github.com/jQRangeSlider/stable/jQRangeSlider.js"></script>
     <script src="http://ghusse.github.com/jQRangeSlider/stable/jQDateRangeSlider.js"></script>
-    
+
     <script src="https://raw.github.com/DmitryBaranovskiy/raphael/master/raphael.js"></script>
     <script src="http://g.raphaeljs.com/g.raphael.js"></script>
     <script src="http://g.raphaeljs.com/g.line.js"></script>
-    
+    <script src="http://stringencoders.googlecode.com/svn-history/r230/trunk/javascript/base64.js"></script>
+
   </head>
   <body>
     <div style='width:800px; display:block; margin-left:auto; margin-right:auto;'>
-    <h1> Croatian lottery randomness analysis </h1> 
-    <div> 
-      <p> This Web application visually displays the randomness in two Croatian lottery systems: the 6/45 and 7/39 system. The goal of the application is to visually explore the degree of uniformity of the drawn numbers. The application uses data made publicly available by the Croatian lottery <a href="https://www.lutrija.hr/cms/Loto7Arhiva">here</a> (for 7/39) and <a href="https://www.lutrija.hr/cms/Loto6Arhiva">here</a> (for 6/45).</p> 
+    <h1> Croatian lottery randomness analysis </h1>
+    <div>
+      <p> This Web application visually displays the randomness in two Croatian lottery systems: the 6/45 and 7/39 system. The goal of the application is to visually explore the degree of uniformity of the drawn numbers. The application uses data made publicly available by the Croatian lottery <a href="https://www.lutrija.hr/cms/Loto7Arhiva">here</a> (for 7/39) and <a href="https://www.lutrija.hr/cms/Loto6Arhiva">here</a> (for 6/45).</p>
       <p>The <strong>application</strong> is developed by <a href="http://ivanzuzak.info">Ivan Zuzak</a> and is available under the <a href="https://github.com/izuzak/cro_lotto_analysis/blob/master/LICENSE.markdown">Apache 2.0 License</a>. I have no claim over the <strong>data</strong> provided by the Croatian lottery. For more information and the source code of the application, visit the <a href="https://github.com/izuzak/cro_lotto_analysis/">GitHub repository</a>.</p>
     </div>
 
@@ -30,8 +31,8 @@
     <h2> Loto 6/45 </h2>
     <div id="6_45_analysis">
     </div>
-    
-    <script type="text/javascript">    
+
+    <script type="text/javascript">
       function showTooltip(x, y, contents) {
         $('<div id="tooltip">' + contents + '</div>').css( {
           position: 'absolute',
@@ -51,35 +52,35 @@
         if (item) {
           if (previousPoint !== item.dataIndex) {
             previousPoint = item.dataIndex;
-            
+
             $("#tooltip").remove();
-            
+
             var x = event.data.data[item.datapoint[0]];
             var y = item.datapoint[1];
-            
+
             showTooltip(item.pageX, item.pageY, "Number " + x.toString() + " was drawn " + y.toString() + " times.");
           }
         } else {
           $("#tooltip").remove();
-          previousPoint = null;            
+          previousPoint = null;
         }
       }
 
       function find_powerset(x) {
         var retVal = [];
-      
+
         for (var i=0, j=Math.pow(2, x.length); i<j; i++) {
           var tempSet = [];
-         
+
           for (var k=0, z=x.length; k<z; k++) {
             if (i & Math.pow(2,k)) {
               tempSet.push(x[k]);
             }
           }
-      
+
           retVal.push(tempSet);
         }
-        
+
         return retVal;
       }
 
@@ -97,119 +98,134 @@
 
       var data = {};
       function fetchData(url, name, elem_id, numberOfElements, setSize) {
-        $.get(url, function(d) {
-          var lines = d.split("\n");
-          data[name] = {};
-          var minDate = null; 
-          var maxDate = null;
+        $.get("https://api.github.com/repos/izuzak/cro_lotto_analysis/git/refs/heads/master", function(d1) {
+          $.get(d1.object.url, function (d2) {
+            $.get(d2.tree.url, function (d3) {
+              var bloburl = null;
 
-          data[name].items = [];
-          for (var i=0; i<lines.length; i++) {
-            if (lines[i].indexOf(";") < 0) {
-              continue;
-            }
-
-            var item_data = lines[i].split(";");
-            var item = {
-              date : new Date(item_data.shift()),
-              numbers : item_data,
-              powerset : sortPowerset(find_powerset(item_data))
-            };
-            
-            if (minDate === null) {
-              minDate = item.date;
-              maxDate = item.date;
-            } else {  
-              if (item.date < minDate) {
-                minDate = item.date;
+              for (var i=0; i<d3.tree.length; i++) {
+                if (d3.tree[i].path === url) {
+                  bloburl = d3.tree[i].url;
+                  break;
+                }
               }
-              
-              if (item.date > maxDate) {
-                maxDate = item.date;
-              }
-            }
-            
-            data[name].items.push(item);
-          }
-          
-          data[name].nfact = 1;
-          data[name].kfact = [];
-          data[name].nmkfact = [];
-          data[name].nokfact = [];
-          
-          for (var i=1; i<=setSize; i++) {
-            data[name].nfact *= i;
-          }
-          
-          for (var i=1; i<=numberOfElements; i++) {
-            data[name].kfact[i] = 1;
-            data[name].nmkfact[i] = 1;
-            
-            for (var j=1; j<=i; j++) {
-              data[name].kfact[i] *= j;
-            }
-            
-            for (var j=1; j<=(setSize-i); j++) {
-              data[name].nmkfact[i] *= j;
-            }
-            
-            data[name].nokfact[i] = Math.round(data[name].nfact / ( data[name].kfact[i] * data[name].nmkfact[i] ));
-          }
-          
-          $("#" + elem_id).append($("<div id='" + elem_id + "_head" + "' style='width:800px;height:30px;margin-top:30;'></div>"));
-          $("#" + elem_id).append($("<div id='" + elem_id + "_slider" + "' style='width:800px;height:30px;margin-top:30;'></div>"));
 
-          for (var i=1; i<=numberOfElements; i++) {
-            $("#" + elem_id).append($("<div id='" + elem_id + "_comb_head" + i.toString() + "' style='width:800px;'></div>"));
-            $("#" + elem_id).append($("<div id='" + elem_id + "_comb_" + i.toString() + "' style='width:800px;height:200px'></div>"));
-          }
-          
-          $("#" + elem_id).append($("<div id='" + elem_id + "_pred_head" + "' style='width:800px;'></div>"));
-          $("#" + elem_id).append($("<div id='" + elem_id + "_pred" + "' style='width:800px;height:200px'></div>"));
-        
-          $("#" + elem_id + "_slider").dateRangeSlider({
-            defaultValues:{min:minDate, max:maxDate},
-            bounds:{min:minDate, max:maxDate},
-            wheelMode: null,
-            wheelSpeed: 8,
-            arrows: false,
-            valueLabels: "show",
-            formatter: function(value){
-              var month = value.getMonth() + 1;
-              var day = value.getDate();
-              return "" + value.getFullYear() + "-" + (month < 10 ? "0" + month : month) + "-" + (day < 10 ? "0" + day : day);
-            },
-            durationIn: 0,
-            durationOut: 400,
-            delayOut: 200
-          }).bind("valuesChanged", function(event, ui) { refreshView(ui.values.min, ui.values.max, name, elem_id); } ).addClass("ui-rangeSlider-dev");
-          
-          refreshView(minDate, maxDate, name, elem_id);
+              $.get(bloburl, function(d4) {
+                var lines = base64.decode(d4.content.replace(/[^A-Za-z0-9\+\/\=]/g, "")).split("\n");
+                data[name] = {};
+                var minDate = null;
+                var maxDate = null;
+
+                data[name].items = [];
+                for (var i=0; i<lines.length; i++) {
+                  if (lines[i].indexOf(";") < 0) {
+                    continue;
+                  }
+
+                  var item_data = lines[i].split(";");
+                  var item = {
+                    date : new Date(item_data.shift()),
+                    numbers : item_data,
+                    powerset : sortPowerset(find_powerset(item_data))
+                  };
+
+                  if (minDate === null) {
+                    minDate = item.date;
+                    maxDate = item.date;
+                  } else {
+                    if (item.date < minDate) {
+                      minDate = item.date;
+                    }
+
+                    if (item.date > maxDate) {
+                      maxDate = item.date;
+                    }
+                  }
+
+                  data[name].items.push(item);
+                }
+
+                data[name].nfact = 1;
+                data[name].kfact = [];
+                data[name].nmkfact = [];
+                data[name].nokfact = [];
+
+                for (var i=1; i<=setSize; i++) {
+                  data[name].nfact *= i;
+                }
+
+                for (var i=1; i<=numberOfElements; i++) {
+                  data[name].kfact[i] = 1;
+                  data[name].nmkfact[i] = 1;
+
+                  for (var j=1; j<=i; j++) {
+                    data[name].kfact[i] *= j;
+                  }
+
+                  for (var j=1; j<=(setSize-i); j++) {
+                    data[name].nmkfact[i] *= j;
+                  }
+
+                  data[name].nokfact[i] = Math.round(data[name].nfact / ( data[name].kfact[i] * data[name].nmkfact[i] ));
+                }
+
+                $("#" + elem_id).append($("<div id='" + elem_id + "_head" + "' style='width:800px;height:30px;margin-top:30;'></div>"));
+                $("#" + elem_id).append($("<div id='" + elem_id + "_slider" + "' style='width:800px;height:30px;margin-top:30;'></div>"));
+
+                for (var i=1; i<=numberOfElements; i++) {
+                  $("#" + elem_id).append($("<div id='" + elem_id + "_comb_head" + i.toString() + "' style='width:800px;'></div>"));
+                  $("#" + elem_id).append($("<div id='" + elem_id + "_comb_" + i.toString() + "' style='width:800px;height:200px'></div>"));
+                }
+
+                $("#" + elem_id).append($("<div id='" + elem_id + "_pred_head" + "' style='width:800px;'></div>"));
+                $("#" + elem_id).append($("<div id='" + elem_id + "_pred" + "' style='width:800px;height:200px'></div>"));
+
+                $("#" + elem_id + "_slider").dateRangeSlider({
+                  defaultValues:{min:minDate, max:maxDate},
+                  bounds:{min:minDate, max:maxDate},
+                  wheelMode: null,
+                  wheelSpeed: 8,
+                  arrows: false,
+                  valueLabels: "show",
+                  formatter: function(value){
+                    var month = value.getMonth() + 1;
+                    var day = value.getDate();
+                    return "" + value.getFullYear() + "-" + (month < 10 ? "0" + month : month) + "-" + (day < 10 ? "0" + day : day);
+                  },
+                  durationIn: 0,
+                  durationOut: 400,
+                  delayOut: 200
+                }).bind("valuesChanged", function(event, ui) { refreshView(ui.values.min, ui.values.max, name, elem_id); } ).addClass("ui-rangeSlider-dev");
+
+                refreshView(minDate, maxDate, name, elem_id);
+              });
+            });
+          });
         });
       }
 
       fetchData("7_39.txt", "7_39", "7_39_analysis", 7, 39);
       fetchData("6_45.txt", "6_45", "6_45_analysis", 6, 45);
-  
+
       function refreshView(startDate, endDate, name, elem_id) {
         var d = data[name].items;
         var n = {};
         var k = [];
         var z = [];
         var r1 = 0, r2 = 0;
-        
+
         var prev_next = {};
 
-        var powersets = []; 
+        var powersets = [];
         for (var i=0; i<d.length; i++) {
           r1 += 1;
-          
+
           if (d[i].date < startDate || d[i].date > endDate) {
-            continue; 
+            continue;
           }
-          
+
           r2 += 1;
-          
+
           for (var j=0; j<d[i].powerset.length; j++) {
             if (typeof powersets[j] === "undefined") {
               powersets[j] = {};
@@ -222,39 +238,39 @@
               powersets[j][ooo] += 1;
             }
           }
-          
+
           if (i === 0) {
             continue;
           }
-          
+
           for (var j=0; j<d[i-1].numbers.length; j++) {
             for (var k=0; k<d[i].numbers.length; k++) {
               var key__x = d[i-1].numbers[j].toString() + "_" + d[i].numbers[k].toString();
-              
+
               if (typeof prev_next[key__x] === "undefined") {
                 prev_next[key__x] = 0;
               } else {
                 prev_next[key__x] += 1;
-              } 
+              }
             }
           }
         }
-        
+
         $("#" + elem_id + "_head").html("");
         $("#" + elem_id + "_head").html("Number of drawing in selection: " + r2.toString() + " out of " + r1.toString() + ".");
-        
+
         prev_next_cnt = 0;
         prev_next_x = [];
         prev_next_y = [];
-        
+
         for (var keyx in prev_next) {
           prev_next_y.push(prev_next[keyx]);
           prev_next_x.push(prev_next_cnt);
           prev_next_cnt += 1;
         }
-        
+
         prev_next_y.sort(function(a,b) { return parseInt(a) - parseInt(b); });
-        
+
         $("#" + elem_id + "_pred_head").html("Previous-next week number pair combination frequencies:");
         $("#" + elem_id + "_pred").html("");
         var r = Raphael(elem_id + "_pred"), txtattr = { font: "12px sans-serif" };
@@ -263,53 +279,53 @@
         for (var i=1; i<powersets.length-1; i++) {
           var data_ = { x : [], y  : []};
           var cnt = 0;
-          
+
           var min_ = 100000000;
           var max_ = 0;
           var unique_ = {};
           var uniquecount = 0;
-          
+
           for (var keyx in powersets[i]) {
             data_.y.push(powersets[i][keyx]);
             data_.x.push(cnt);
             cnt += 1;
-            
+
             max_ = (powersets[i][keyx] > max_) ? powersets[i][keyx] : max_;
             min_ = (powersets[i][keyx] < min_) ? powersets[i][keyx] : min_;
-            
+
             if (!(powersets[i][keyx] in unique_)) {
 
-              
+
               uniquecount += 1;
 
             }
-            
+
             if (typeof unique_[powersets[i][keyx]] === "undefined") {
               unique_[powersets[i][keyx]] = 0;
             }
             unique_[powersets[i][keyx]] += 1;
           }
-          
+
           unique_["0"] = data[name].nokfact[i] - cnt;
-          
+
           data_.y.sort(function(a,b) { return parseInt(a) - parseInt(b); });
-          
+
           var str_ = "";
-          
+
           for (var key_ in unique_) {
             str_ += " " + unique_[key_].toString() + ":" + key_.toString() + ",";
           }
-          
+
           str_ = str_.substring(0, str_.length-1) + ".";
-          
+
           $("#" + elem_id + "_comb_head" + i.toString()).html("");
           $("#" + elem_id + "_comb_head" + i.toString()).html("Number of elements in combinations: " + i.toString() + ". <br> Number of different combinations which were drawn at least once (x axis): " + cnt.toString() + " (out of: " + data[name].nokfact[i] + "). <br> Number of different drawing counts (unique y axis values): " + uniquecount.toString() + ". Maximum-minimum drawing count ratio: " + (max_/min_).toFixed(3).toString() + ". <br> Frequencies (number of combinations : number of drawings):" + str_);
-          
+
           $("#" + elem_id + "_comb_" + i.toString()).html("");
           var r = Raphael(elem_id + "_comb_" + i.toString()), txtattr = { font: "12px sans-serif" };
           r.linechart(20, 0, 770, 180, data_.x, data_.y, { axis: "0 0 1 1", smooth: false });
-          
-          
+
+
         }
 
       }
@@ -320,7 +336,7 @@
       _gaq.push(['_setDomainName', 'auto']);
       _gaq.push(['_setAllowLinker', true]);
       _gaq.push(['_trackPageview']);
-    
+
       (function() {
         var ga = document.createElement('script'); ga.type = 'text/javascript';
         ga.async = true;
@@ -329,7 +345,7 @@
         var s = document.getElementsByTagName('script')[0];
         s.parentNode.insertBefore(ga, s);
       })();
-    </script>    
+    </script>
     </div>
   </body>
 </html>

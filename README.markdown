@@ -6,7 +6,7 @@ The second purpose of the application is provide csv-formatted data for the two 
 
 # Data
 
-The application uses data made publicly available by the Croatian lottery [here](https://www.lutrija.hr/cms/Loto7Arhiva) (for 7/39) and [here](https://www.lutrija.hr/cms/Loto6Arhiva) (for 6/45). The equivalent csv-formatted data is made available in this repository [here](https://github.com/izuzak/cro_lotto_analysis/blob/master/7_39.txt) (for 7/39) and [here](https://github.com/izuzak/cro_lotto_analysis/blob/master/6_45.txt) (for 6/45).
+The application uses data made publicly available by the Croatian lottery [here](https://www.lutrija.hr/cms/Loto7Arhiva) (for 7/39) and [here](https://www.lutrija.hr/cms/Loto6Arhiva) (for 6/45). The equivalent csv-formatted data is made available in this repository [here](7_39.txt) (for 7/39) and [here](6_45.txt) (for 6/45).
 
 # License
 

@@ -15,3 +15,5 @@ The **application** is developed by [Ivan Zuzak](http://ivanzuzak.info) and lice
 # Credits
 
 The application was built with [jQuery](https://github.com/jquery/jquery), the [gRaphael](http://g.raphaeljs.com/) for drawing graphs and the [jQRangeSlider jQuery plugin](https://github.com/ghusse/jQRangeSlider) for choosing time ranges.
+
+[![gaugestracking alpha](https://secure.gaug.es/track.gif?h[site_id]=5163d490613f5d361b000023&h[resource]=http%3A%2F%2Fgithub.com%2Fizuzak%2Fcro_lotto_analysis&h[title]=cro_lotto_analysis%20%28GitHub%29&h[unique]=1&h[unique_hour]=1&h[unique_day]=1&h[unique_month]=1&h[unique_year]=1 "ivanzuzak.info")](http://ivanzuzak.info/)
